@@ -30,6 +30,10 @@ class Food():
         s += f"price: {self.price}\n"
         s += f"description: {self.description}\n"
         return s
+    
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)
 
         
 class TreeNode():
@@ -234,6 +238,7 @@ def build_tree(food_types, food_map):
         root.children.append(node)
     return root
 
+
 def yes(prompt):
     '''
     Acknowledge the idea in Project 2
@@ -388,6 +393,7 @@ def main():
         food_types = get_food_types(None, menu)
         food_map = get_all_food(food_types, menu)
     main_food = build_tree(food_types[:3], food_map)
+    store_tree(main_food)
     sides = build_tree(food_types[3], food_map)
     drinks = build_tree(food_types[4], food_map)
     protein = TreeNode('Protein', None, ['1.Chicken', '2.Beef', '3.Tofu', '4.Shrimp (served with $1 more)'])
@@ -414,6 +420,26 @@ def main():
         print(location)
     print("Goodbye!")
 
+
+def map_tree(node, m):
+    food_type = 'food_type'
+    food = 'food'
+    children = 'children'
+    m[food_type] = node.food_type
+    if node.food:
+        m[food] = node.food.toJSON()
+    else:
+        m[food] = node.food
+    m[children] = []
+    if node.children and len(node.children) > 0:
+        for child in node.children:
+            m[children].append(map_tree(child, {}))
+    return m
+
+def store_tree(node):
+    m = map_tree(node, {})
+    with open('tree.json', 'w') as f:
+        json.dump(m, f)
 
 if __name__ == '__main__':
     main()
